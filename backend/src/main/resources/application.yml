@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: infiltrado
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5443/${DB_NAME:infiltrado}?currentSchema=infiltrado
+    username: ${DB_USER:infiltrado}
+    password: ${DB_PASSWORD:infiltrado}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: infiltrado-pool
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: infiltrado
+        format_sql: false
+
+  flyway:
+    schemas: infiltrado
+    default-schema: infiltrado
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
+server:
+  port: 8093
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+
+# Propiedades propias del dominio
+infiltrado:
+  jwt:
+    secret: ${JWT_SECRET:changethissecretinproduction-must-be-at-least-32-chars}
+    expiration-hours: 12
+  rate-limit:
+    # Protección de fuerza bruta para el código de 4 dígitos y código de sala
+    card-endpoint:
+      max-attempts: 5
+      window-minutes: 1
+      lockout-minutes: 5
+
+logging:
+  level:
+    root: INFO
+    com.transer.infiltrado: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId}] %logger{36} - %msg%n"

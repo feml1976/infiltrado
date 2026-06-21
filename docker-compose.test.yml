@@ -1,0 +1,36 @@
+# Compose para pruebas de integración (local y CI/CD).
+# Levanta un PostgreSQL efímero (tmpfs, sin volumen persistente) con
+# los schemas infiltrado y test_infiltrado ya creados.
+#
+# IMPORTANTE: este contenedor publica el puerto 5444 (NO 5443) para quedar
+# AISLADO del PostgreSQL de producción/desarrollo (docker-compose.yml usa 5443).
+# Así los tests corren siempre contra una BD limpia y efímera, sin heredar
+# estado ni migraciones fallidas del contenedor de prod.
+#
+# Uso (local o CI):
+#   docker-compose -f docker-compose.test.yml up -d
+#   cd backend && mvn test -Pit -Dspring.profiles.active=test
+#   docker-compose -f docker-compose.test.yml down -v
+
+services:
+
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: infiltrado-postgres-test
+    ports:
+      - "5444:5432"
+    environment:
+      POSTGRES_DB: infiltrado
+      POSTGRES_USER: ${DB_USER:-infiltrado}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-infiltrado}
+    # tmpfs: datos en memoria — estado limpio en cada arranque, ideal para CI.
+    tmpfs:
+      - /var/lib/postgresql/data
+    volumes:
+      - ./docker/init-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-infiltrado} -d infiltrado"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s

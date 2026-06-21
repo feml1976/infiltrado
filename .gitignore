@@ -1,0 +1,41 @@
+# ── Maven ─────────────────────────────────────────────────────────────────────
+backend/target/
+backend/.mvn/
+!backend/.mvn/wrapper/maven-wrapper.jar
+!backend/.mvn/wrapper/maven-wrapper.properties
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# ── Node / npm ────────────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ── Variables de entorno (nunca versionar) ────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── IDE — IntelliJ ────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# ── IDE — VS Code ─────────────────────────────────────────────────────────────
+.vscode/
+!.vscode/extensions.json
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+docker-volumes/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store

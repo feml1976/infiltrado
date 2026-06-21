@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    # Puerto 5444: contenedor de test aislado (docker-compose.test.yml), NO el de prod (5443).
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT_TEST:5444}/${DB_NAME:infiltrado}?currentSchema=test_infiltrado
+  jpa:
+    properties:
+      hibernate:
+        default_schema: test_infiltrado
+    # Hibernate auto-detecta el dialecto PostgreSQL; no hace falta declararlo.
+  flyway:
+    schemas: test_infiltrado
+    default-schema: test_infiltrado
