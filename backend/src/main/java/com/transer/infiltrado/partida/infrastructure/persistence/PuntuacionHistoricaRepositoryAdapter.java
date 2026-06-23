@@ -1,9 +1,11 @@
 package com.transer.infiltrado.partida.infrastructure.persistence;
 
+import com.transer.infiltrado.partida.domain.PuntuacionHistoricaEntry;
 import com.transer.infiltrado.partida.domain.PuntuacionHistoricaRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -28,5 +30,17 @@ class PuntuacionHistoricaRepositoryAdapter implements PuntuacionHistoricaReposit
         entity.fecha     = Instant.now();
 
         jpaRepo.save(entity);
+    }
+
+    @Override
+    public int acumuladoGlobal(UUID idUsuario) {
+        return (int) jpaRepo.sumPuntosByIdUsuario(idUsuario);
+    }
+
+    @Override
+    public List<PuntuacionHistoricaEntry> buscarHistorialPorUsuario(UUID idUsuario) {
+        return jpaRepo.findByIdUsuarioOrderByFechaDesc(idUsuario).stream()
+                .map(e -> new PuntuacionHistoricaEntry(e.idPartida, e.puntos, e.fecha))
+                .toList();
     }
 }

@@ -63,8 +63,8 @@ public class RegistrarAdivinanzaUseCase {
             eventPublisher.publicarCambioFase(
                     partida.getId(), partida.getEstado(), partida.getRondaActual());
             if (partida.getEstado() == EstadoPartida.REVELACION) {
-                // Calcular puntajes, persistir y emitir evento revelacion WS
-                revelacionUseCase.ejecutar(partida.getCodigoSala());
+                // Calcular puntajes, persistir y emitir evento revelacion WS (una sola vez en esta TX)
+                revelacionUseCase.calcularYPublicar(partida.getCodigoSala());
             }
         }
 

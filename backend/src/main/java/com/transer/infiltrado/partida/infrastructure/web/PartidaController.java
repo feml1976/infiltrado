@@ -27,6 +27,8 @@ public class PartidaController {
     private final RegistrarSenalamienatoUseCase registrarSenalamiento;
     private final RegistrarAdivinanzaUseCase registrarAdivinanza;
     private final RevelacionUseCase revelacion;
+    private final ContinuarPartidaUseCase continuarPartida;
+    private final TerminarPartidaUseCase terminarPartida;
 
     public PartidaController(CrearPartidaUseCase crearPartida,
                               UnirseAPartidaUseCase unirseAPartida,
@@ -39,7 +41,9 @@ public class PartidaController {
                               VotarRevisionUseCase votarRevision,
                               RegistrarSenalamienatoUseCase registrarSenalamiento,
                               RegistrarAdivinanzaUseCase registrarAdivinanza,
-                              RevelacionUseCase revelacion) {
+                              RevelacionUseCase revelacion,
+                              ContinuarPartidaUseCase continuarPartida,
+                              TerminarPartidaUseCase terminarPartida) {
         this.crearPartida         = crearPartida;
         this.unirseAPartida       = unirseAPartida;
         this.iniciarPartida       = iniciarPartida;
@@ -52,6 +56,8 @@ public class PartidaController {
         this.registrarSenalamiento = registrarSenalamiento;
         this.registrarAdivinanza  = registrarAdivinanza;
         this.revelacion           = revelacion;
+        this.continuarPartida     = continuarPartida;
+        this.terminarPartida      = terminarPartida;
     }
 
     @PostMapping
@@ -62,6 +68,7 @@ public class PartidaController {
     }
 
     @PostMapping("/{codigoSala}/unirse")
+    @RateLimited(key = "unirse", maxAttempts = 5, windowMinutes = 1, lockoutMinutes = 5)
     public EstadoPartidaResponse unirse(@PathVariable String codigoSala,
                                          @AuthenticationPrincipal UsuarioPrincipal principal) {
         return unirseAPartida.ejecutar(codigoSala.toUpperCase(), principal.getId(), principal.getNombre());
@@ -129,6 +136,18 @@ public class PartidaController {
     @GetMapping("/{codigoSala}/revelacion")
     public RevelacionResponse revelacion(@PathVariable String codigoSala) {
         return revelacion.ejecutar(codigoSala.toUpperCase());
+    }
+
+    @PostMapping("/{codigoSala}/continuar")
+    public EstadoPartidaResponse continuar(@PathVariable String codigoSala,
+                                            @AuthenticationPrincipal UsuarioPrincipal principal) {
+        return continuarPartida.ejecutar(codigoSala.toUpperCase(), principal.getId());
+    }
+
+    @PostMapping("/{codigoSala}/terminar")
+    public EstadoPartidaResponse terminar(@PathVariable String codigoSala,
+                                           @AuthenticationPrincipal UsuarioPrincipal principal) {
+        return terminarPartida.ejecutar(codigoSala.toUpperCase(), principal.getId());
     }
 
     // Rate limiting activado en Paso 16 — el interceptor AOP ya respeta la anotación

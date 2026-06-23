@@ -4,17 +4,21 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -22,23 +26,34 @@ public class JwtService implements TokenGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(JwtService.class);
 
-    // TODO Paso 16 — Endurecimiento: agregar @PostConstruct que rechace el arranque
-    // si el perfil activo no es dev/test y el secreto coincide con el valor de fallback
-    // del application.yml. Un secreto conocido públicamente (está en el repo) permite
-    // firmar tokens arbitrarios con privilegios de admin.
     static final String DEV_FALLBACK_SECRET = "changethissecretinproduction-must-be-at-least-32-chars";
 
     private static final String CLAIM_NOMBRE   = "nombre";
     private static final String CLAIM_ES_ADMIN = "admin";
+    private static final Set<String> DEV_PROFILES = Set.of("dev", "test", "default");
 
-    private final String secret;
-    private final int expirationHours;
+    private final String      secret;
+    private final int         expirationHours;
+    private final Environment environment;
 
     public JwtService(
             @Value("${infiltrado.jwt.secret}") String secret,
-            @Value("${infiltrado.jwt.expiration-hours}") int expirationHours) {
+            @Value("${infiltrado.jwt.expiration-hours}") int expirationHours,
+            Environment environment) {
         this.secret          = secret;
         this.expirationHours = expirationHours;
+        this.environment     = environment;
+    }
+
+    @PostConstruct
+    void validarSecretoEnProduccion() {
+        boolean esPerfilSeguro = Arrays.stream(environment.getActiveProfiles())
+                .anyMatch(DEV_PROFILES::contains);
+        if (!esPerfilSeguro && DEV_FALLBACK_SECRET.equals(secret)) {
+            throw new IllegalStateException(
+                    "JWT_SECRET no puede ser el valor por defecto en un perfil de producción. " +
+                    "Define la variable de entorno JWT_SECRET con un secreto seguro.");
+        }
     }
 
     @Override

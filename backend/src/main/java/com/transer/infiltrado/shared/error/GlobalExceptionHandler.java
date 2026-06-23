@@ -4,11 +4,13 @@ import com.transer.infiltrado.catalogo.domain.exception.CosaNoEncontradaExceptio
 import com.transer.infiltrado.catalogo.domain.exception.ImagenInvalidaException;
 import com.transer.infiltrado.catalogo.domain.exception.NombreCosaDuplicadoException;
 import com.transer.infiltrado.partida.domain.exception.*;
+import com.transer.infiltrado.shared.error.TooManyRequestsException;
 
 import com.transer.infiltrado.usuarios.domain.exception.CredencialesInvalidasException;
 import com.transer.infiltrado.usuarios.domain.exception.EmailYaRegistradoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -127,6 +129,15 @@ public class GlobalExceptionHandler {
         // Mensaje genérico: no se distingue email inexistente de password incorrecta
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ApiError.of(401, ex.getMessage()));
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ApiError> handleRateLimit(TooManyRequestsException ex) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Retry-After", String.valueOf(ex.getRetryAfterSeconds()));
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .headers(headers)
+                .body(ApiError.of(429, "Demasiados intentos. Por favor espera antes de reintentar."));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

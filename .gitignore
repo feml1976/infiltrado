@@ -39,3 +39,6 @@ logs/
 
 # ── macOS ─────────────────────────────────────────────────────────────────────
 .DS_Store
+
+# ── Imágenes fuente (PNGs grandes, no versionar; convertir a Base64 en BD) ───
+images/

@@ -50,6 +50,12 @@ class RevisionRepositoryAdapter implements RevisionRepository {
                 .toList();
     }
 
+    @Override
+    public void eliminarPorPartida(UUID idPartida) {
+        // deleteAll con entidades cargadas garantiza el cascade a votos_revision
+        jpaRepo.deleteAll(jpaRepo.findByIdPartida(idPartida));
+    }
+
     private void syncVotos(Revision revision, RevisionJpaEntity entity) {
         Set<UUID> idsExistentes = entity.votos.stream()
                 .map(v -> v.idJugador)

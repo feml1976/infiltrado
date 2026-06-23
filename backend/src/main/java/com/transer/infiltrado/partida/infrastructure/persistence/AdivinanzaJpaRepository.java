@@ -7,4 +7,5 @@ import java.util.UUID;
 
 interface AdivinanzaJpaRepository extends JpaRepository<AdivinanzaJpaEntity, UUID> {
     List<AdivinanzaJpaEntity> findByIdPartida(UUID idPartida);
+    void deleteByIdPartida(UUID idPartida);
 }

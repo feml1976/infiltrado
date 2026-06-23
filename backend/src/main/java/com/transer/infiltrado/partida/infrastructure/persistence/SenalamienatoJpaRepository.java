@@ -7,4 +7,5 @@ import java.util.UUID;
 
 interface SenalamienatoJpaRepository extends JpaRepository<SenalamienatoJpaEntity, UUID> {
     List<SenalamienatoJpaEntity> findByIdPartida(UUID idPartida);
+    void deleteByIdPartida(UUID idPartida);
 }

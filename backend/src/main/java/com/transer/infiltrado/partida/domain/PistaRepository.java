@@ -6,4 +6,5 @@ import java.util.UUID;
 public interface PistaRepository {
     Pista guardar(Pista pista);
     List<Pista> buscarPorPartida(UUID idPartida);
+    void eliminarPorPartida(UUID idPartida);
 }

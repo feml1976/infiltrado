@@ -37,6 +37,11 @@ class PistaRepositoryAdapter implements PistaRepository {
                 .toList();
     }
 
+    @Override
+    public void eliminarPorPartida(UUID idPartida) {
+        jpaRepo.deleteByIdPartida(idPartida);
+    }
+
     private Pista toDomain(PistaJpaEntity e) {
         return Pista.reconstituir(e.id, e.idPartida, e.idJugador,
                 e.ronda, e.ordenEnRonda, e.contenido, e.createdAt);

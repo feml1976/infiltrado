@@ -7,4 +7,5 @@ import java.util.UUID;
 
 interface PistaJpaRepository extends JpaRepository<PistaJpaEntity, UUID> {
     List<PistaJpaEntity> findByIdPartida(UUID idPartida);
+    void deleteByIdPartida(UUID idPartida);
 }

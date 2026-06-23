@@ -34,7 +34,7 @@ Al destapar su carta solo ve la etiqueta "Infiltrado"; no conoce la cosa objetiv
 
 ### 2.3 Moderador
 
-Usuario que crea y parametriza la partida (número de jugadores, número de infiltrados y número de rondas) y genera el **código de sala** para que los demás se unan.
+Usuario que crea y parametriza la partida (número de jugadores, número de infiltrados y número de rondas) y genera el **código de sala** para que los demás se unan. El moderador es un **organizador**: no se inscribe como jugador ni recibe carta, solo controla el avance de la partida. En consecuencia, el **mínimo de 3 jugadores** se refiere a los **jugadores inscritos**, sin contar al moderador (es decir, para jugar se necesitan el moderador más 3 jugadores).
 
 ---
 

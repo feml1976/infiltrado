@@ -35,6 +35,11 @@ class SenalamienatoRepositoryAdapter implements SenalamienatoRepository {
                 .toList();
     }
 
+    @Override
+    public void eliminarPorPartida(UUID idPartida) {
+        jpaRepo.deleteByIdPartida(idPartida);
+    }
+
     private Senalamiento toDomain(SenalamienatoJpaEntity e) {
         return Senalamiento.reconstituir(
                 e.id, e.idPartida, e.idJugadorOrigen, e.idJugadorSenalado, e.createdAt);

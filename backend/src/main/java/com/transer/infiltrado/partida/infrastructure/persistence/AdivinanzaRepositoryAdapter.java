@@ -38,6 +38,11 @@ class AdivinanzaRepositoryAdapter implements AdivinanzaRepository {
                 .toList();
     }
 
+    @Override
+    public void eliminarPorPartida(UUID idPartida) {
+        jpaRepo.deleteByIdPartida(idPartida);
+    }
+
     private Adivinanza toDomain(AdivinanzaJpaEntity e) {
         return Adivinanza.reconstituir(
                 e.id, e.idPartida, e.idJugadorInfiltrado,

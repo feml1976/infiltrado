@@ -6,4 +6,5 @@ import java.util.UUID;
 public interface SenalamienatoRepository {
     Senalamiento guardar(Senalamiento senalamiento);
     List<Senalamiento> buscarPorPartida(UUID idPartida);
+    void eliminarPorPartida(UUID idPartida);
 }

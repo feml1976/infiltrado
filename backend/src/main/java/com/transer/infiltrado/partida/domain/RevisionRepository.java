@@ -8,4 +8,5 @@ public interface RevisionRepository {
     Revision guardar(Revision revision);
     Optional<Revision> buscarPorId(UUID id);
     List<Revision> buscarPorPartida(UUID idPartida);
+    void eliminarPorPartida(UUID idPartida);
 }

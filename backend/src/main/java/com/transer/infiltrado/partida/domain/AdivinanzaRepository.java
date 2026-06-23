@@ -6,4 +6,5 @@ import java.util.UUID;
 public interface AdivinanzaRepository {
     Adivinanza guardar(Adivinanza adivinanza);
     List<Adivinanza> buscarPorPartida(UUID idPartida);
+    void eliminarPorPartida(UUID idPartida);
 }

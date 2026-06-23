@@ -162,7 +162,10 @@ El `codigo_4_digitos` es **por sesión de juego**, no por ronda. Se asigna en `i
 2. Los eventos WebSocket de difusión **nunca** incluyen el rol de nadie antes de la fase `REVELACION`.
 3. La carta solo se sirve al propietario autenticado de ese código, vía endpoint dedicado protegido.
 4. El `codigo_4_digitos` y el `codigo_sala` nunca aparecen en logs.
-5. Rate limiting: máx. 5 intentos fallidos / 1 min / bloqueo 5 min en el endpoint de carta.
+5. Rate limiting: máx. 5 intentos / 1 min / bloqueo 5 min en `/login`, `/mi-carta` y `/unirse`.
+   Implementación: `RateLimitingAspect` (AOP, ventana deslizante, `ConcurrentHashMap`).
+   **Limitación conocida:** los contadores son in-memory — válido para instancia única.
+   En despliegue multi-instancia el umbral real se multiplica por réplicas; migrar a Redis si escala.
 6. Regla del 50 %: `num_infiltrados <= floor((n-1)/2)`. Rechazar en el límite del sistema.
 7. Mínimo 3 jugadores para iniciar una partida.
 
