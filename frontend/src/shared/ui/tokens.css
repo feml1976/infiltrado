@@ -66,9 +66,13 @@
                0 0 0 1px rgba(255, 255, 255, 0.05);
   --shadow-glow: 0 0 24px rgba(99, 102, 241, 0.25);
 
-  /* ── Transiciones ───────────────────── */
-  --tr-fast: 0.15s ease;
-  --tr-med:  0.25s ease;
+  /* ── Transiciones y animaciones ─────── */
+  --tr-fast:   0.15s ease;
+  --tr-med:    0.25s ease;
+  --tr-slow:   0.4s ease;
+  --dur-slide: 0.28s;
+  --dur-pulse: 2s;
+  --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* ── Layout shell ───────────────────── */
   --header-h: 56px;

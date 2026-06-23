@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { usePartida } from './hooks/usePartida'
@@ -25,8 +25,25 @@ export function PartidaPage() {
 
   const [mostrarCarta, setMostrarCarta] = useState(false)
 
+  const prevPlayerIdsRef = useRef<Set<string> | null>(null)
+  const [recentlyJoinedIds, setRecentlyJoinedIds] = useState<Set<string>>(new Set())
+
   const { data: partida, isLoading, isError } = usePartida(codigoSala ?? '')
   usePartidaSocket(partida, codigoSala ?? '')
+
+  useEffect(() => {
+    if (!partida) return
+    const currentIds = new Set(partida.jugadores.map((j) => j.id))
+    if (prevPlayerIdsRef.current === null) {
+      prevPlayerIdsRef.current = currentIds
+      return
+    }
+    const freshIds = [...currentIds].filter((id) => !prevPlayerIdsRef.current!.has(id))
+    prevPlayerIdsRef.current = currentIds
+    if (freshIds.length > 0) {
+      setRecentlyJoinedIds(new Set(freshIds))
+    }
+  }, [partida])
 
   const esModerador = partida?.idModerador === userId
 
@@ -60,7 +77,10 @@ export function PartidaPage() {
                 .slice()
                 .sort((a, b) => a.ordenTurno - b.ordenTurno)
                 .map((j) => (
-                  <div key={j.id} className="player-item">
+                  <div
+                    key={j.id}
+                    className={`player-item ${recentlyJoinedIds.has(j.id) ? 'player-item--new' : ''}`}
+                  >
                     <div
                       className="player-badge"
                       style={{ background: getPlayerColor(j.ordenTurno) }}
@@ -173,8 +193,10 @@ export function PartidaPage() {
               <CartaView codigoSala={codigoSala} onClose={() => setMostrarCarta(false)} />
             )}
 
-            {/* Fase actual */}
-            {renderFase()}
+            {/* Fase actual — key fuerza remount y re-dispara la animación */}
+            <div key={partida.estado} className="fase-content">
+              {renderFase()}
+            </div>
           </>
         )}
       </div>

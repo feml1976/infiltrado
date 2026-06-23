@@ -1,9 +1,11 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useRef, useEffect, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { usePartidaStore } from '@/store/partidaStore'
 import { registrarPista, avanzarTurno } from '@/shared/api/partidaApi'
 import { extractApiError } from '@/shared/api/client'
-import type { EstadoPartida } from '@/shared/api/types'
+import { getPlayerColor } from '@/shared/utils/playerColors'
+import { useCountUp } from '@/shared/hooks/useCountUp'
+import type { EstadoPartida, JugadorResumen } from '@/shared/api/types'
 
 interface Props {
   partida: EstadoPartida
@@ -11,20 +13,56 @@ interface Props {
   userId: string
 }
 
+interface ScoreRowProps {
+  jugador: JugadorResumen
+  isActiveTurn: boolean
+}
+
+function ScoreRow({ jugador, isActiveTurn }: ScoreRowProps) {
+  const pts = useCountUp(jugador.puntosAcumulados)
+  const [showFlash, setShowFlash] = useState(false)
+  const prevPtsRef = useRef(jugador.puntosAcumulados)
+
+  useEffect(() => {
+    if (prevPtsRef.current !== jugador.puntosAcumulados) {
+      prevPtsRef.current = jugador.puntosAcumulados
+      setShowFlash(true)
+      const t = window.setTimeout(() => setShowFlash(false), 750)
+      return () => window.clearTimeout(t)
+    }
+  }, [jugador.puntosAcumulados])
+
+  const color = getPlayerColor(jugador.ordenTurno)
+
+  return (
+    <div
+      className={`player-item player-item--active-turn ${showFlash ? 'score-row--flash' : ''}`}
+      style={isActiveTurn ? {
+        background: color + '18',
+        boxShadow: `inset 3px 0 0 ${color}`,
+      } : undefined}
+    >
+      <div className="player-badge" style={{ background: color }}>{jugador.ordenTurno}</div>
+      <span className="player-name">{jugador.nombre}</span>
+      <span style={{ marginLeft: 'auto', color: '#818cf8', fontWeight: 700 }}>
+        {pts} pts
+      </span>
+    </div>
+  )
+}
+
 export function EnCursoView({ partida, codigoSala, userId }: Props) {
   const queryClient        = useQueryClient()
   const idJugadorTurno     = usePartidaStore((s) => s.idJugadorTurnoActual)
   const jugadoresConPista  = usePartidaStore((s) => s.jugadoresConPista)
 
-  const [pista, setPista]   = useState('')
+  const [pista, setPista]           = useState('')
   const [pistaEnviada, setPistaEnviada] = useState(false)
 
   const esMiTurno = idJugadorTurno === userId
   const esModerador = partida.idModerador === userId
 
   const jugadorTurno = partida.jugadores.find((j) => j.id === idJugadorTurno)
-
-  const puntosMap = Object.fromEntries(partida.jugadores.map((j) => [j.id, j]))
 
   const pistaMutation = useMutation({
     mutationFn: () => registrarPista(codigoSala, pista.trim()),
@@ -48,14 +86,14 @@ export function EnCursoView({ partida, codigoSala, userId }: Props) {
   return (
     <div className="fase-section">
       {/* Turno actual */}
-      <div className="turno-info">
+      <div className={`turno-info ${esMiTurno ? 'turno-info--mio' : ''}`}>
         {idJugadorTurno ? (
           <>
             <div style={{ color: '#64748b', fontSize: '0.8125rem', marginBottom: '0.25rem' }}>
               Turno
             </div>
             <div className={`turno-nombre ${esMiTurno ? 'turno-mio' : ''}`}>
-              {esMiTurno ? 'Tu turno' : (jugadorTurno?.nombre ?? 'Cargando…')}
+              {esMiTurno ? '¡Es tu turno!' : (jugadorTurno?.nombre ?? 'Cargando…')}
             </div>
           </>
         ) : (
@@ -72,9 +110,18 @@ export function EnCursoView({ partida, codigoSala, userId }: Props) {
             .sort((a, b) => a.ordenTurno - b.ordenTurno)
             .map((j) => {
               const dioP = jugadoresConPista.includes(j.id)
+              const color = getPlayerColor(j.ordenTurno)
+              const isActive = j.id === idJugadorTurno
               return (
-                <div key={j.id} className="player-item">
-                  <div className="player-badge">{j.ordenTurno}</div>
+                <div
+                  key={j.id}
+                  className="player-item player-item--active-turn"
+                  style={isActive ? {
+                    background: color + '18',
+                    boxShadow: `inset 3px 0 0 ${color}`,
+                  } : undefined}
+                >
+                  <div className="player-badge" style={{ background: color }}>{j.ordenTurno}</div>
                   <span className="player-name">{j.nombre}</span>
                   <span style={{ marginLeft: 'auto', fontSize: '0.875rem' }}>
                     {dioP ? (
@@ -132,7 +179,7 @@ export function EnCursoView({ partida, codigoSala, userId }: Props) {
       )}
 
       {esMiTurno && pistaEnviada && (
-        <div style={{ textAlign: 'center', color: '#34d399', marginTop: '1rem' }}>
+        <div className="action-confirmed" style={{ textAlign: 'center', color: '#34d399', marginTop: '1rem' }}>
           Pista registrada — esperando a los demás jugadores
         </div>
       )}
@@ -154,7 +201,7 @@ export function EnCursoView({ partida, codigoSala, userId }: Props) {
         </div>
       )}
 
-      {/* Tabla de puntos */}
+      {/* Tabla de puntos con count-up */}
       <div style={{ marginTop: '1.5rem' }}>
         <h3>Puntos actuales</h3>
         <div className="player-list">
@@ -162,13 +209,11 @@ export function EnCursoView({ partida, codigoSala, userId }: Props) {
             .slice()
             .sort((a, b) => b.puntosAcumulados - a.puntosAcumulados)
             .map((j) => (
-              <div key={j.id} className="player-item">
-                <div className="player-badge">{puntosMap[j.id]?.ordenTurno}</div>
-                <span className="player-name">{j.nombre}</span>
-                <span style={{ marginLeft: 'auto', color: '#818cf8', fontWeight: 700 }}>
-                  {j.puntosAcumulados} pts
-                </span>
-              </div>
+              <ScoreRow
+                key={j.id}
+                jugador={j}
+                isActiveTurn={j.id === idJugadorTurno}
+              />
             ))}
         </div>
       </div>

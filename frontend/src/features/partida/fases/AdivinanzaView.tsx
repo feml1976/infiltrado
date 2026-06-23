@@ -53,7 +53,7 @@ export function AdivinanzaView({ partida, codigoSala, userId: _userId }: Props) 
       </div>
 
       {declarada ? (
-        <div style={{ textAlign: 'center', color: '#34d399', padding: '1rem 0' }}>
+        <div className="action-confirmed" style={{ textAlign: 'center', color: '#34d399', padding: '1rem 0' }}>
           Adivinanza registrada — esperando la revelación
         </div>
       ) : (

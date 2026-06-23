@@ -52,11 +52,15 @@ export function CartaView({ codigoSala, onClose }: CartaViewProps) {
 
       {!esInfiltrado && carta.nombreCosa && (
         carta.tipo === 'IMAGEN' && carta.imagenBase64 ? (
-          <img
-            className="carta-imagen"
-            src={`data:image/jpeg;base64,${carta.imagenBase64}`}
-            alt={carta.nombreCosa}
-          />
+          <>
+            <img
+              className="carta-imagen"
+              src={`data:image/jpeg;base64,${carta.imagenBase64}`}
+              alt={carta.nombreCosa}
+            />
+            {/* Nombre visible bajo la imagen, para evitar confusiones entre jugadores */}
+            <div className="carta-cosa">{carta.nombreCosa}</div>
+          </>
         ) : (
           <div className="carta-cosa">{carta.nombreCosa}</div>
         )

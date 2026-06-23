@@ -62,7 +62,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5183"));
+        // Orígenes permitidos. localhost para desarrollo en el PC; patrones de red
+        // privada (192.168.x.x / 10.x.x.x) para probar desde celular/tablet en la misma
+        // LAN durante desarrollo. PRODUCCIÓN: restringir a la(s) URL(s) real(es) del front,
+        // idealmente vía propiedad/variable de entorno (no patrones abiertos).
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:5183",
+                "http://127.0.0.1:5183",
+                "http://192.168.*.*:5183",
+                "http://10.*.*.*:5183"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(false);

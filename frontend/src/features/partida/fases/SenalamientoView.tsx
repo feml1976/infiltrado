@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { registrarSenalamiento } from '@/shared/api/partidaApi'
 import { extractApiError } from '@/shared/api/client'
+import { getPlayerColor } from '@/shared/utils/playerColors'
 import type { EstadoPartida } from '@/shared/api/types'
 
 interface Props {
@@ -20,9 +21,14 @@ export function SenalamientoView({ partida, codigoSala, userId }: Props) {
   const totalSeñalados = partida.jugadores.filter((j) => j.haSenalado).length
   const pendientes     = partida.numJugadores - totalSeñalados
 
+  const [recienConfirmado, setRecienConfirmado] = useState(false)
+
   const mutation = useMutation({
     mutationFn: () => registrarSenalamiento(codigoSala, seleccion),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['partida', codigoSala] }),
+    onSuccess: () => {
+      setRecienConfirmado(true)
+      queryClient.invalidateQueries({ queryKey: ['partida', codigoSala] })
+    },
   })
 
   function toggle(id: string) {
@@ -45,8 +51,11 @@ export function SenalamientoView({ partida, codigoSala, userId }: Props) {
       </div>
 
       {yaSeñale ? (
-        <div style={{ textAlign: 'center', color: '#34d399', padding: '1.5rem 0' }}>
-          Ya señalaste — esperando a los demás
+        <div
+          className={recienConfirmado ? 'action-confirmed' : ''}
+          style={{ textAlign: 'center', color: '#34d399', padding: '1.5rem 0' }}
+        >
+          Señalamiento registrado — esperando a los demás
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
@@ -71,9 +80,9 @@ export function SenalamientoView({ partida, codigoSala, userId }: Props) {
                     type="checkbox"
                     checked={seleccion.includes(j.id)}
                     onChange={() => toggle(j.id)}
-                    style={{ accentColor: '#6366f1', width: '18px', height: '18px' }}
+                    style={{ accentColor: getPlayerColor(j.ordenTurno), width: '18px', height: '18px' }}
                   />
-                  <div className="player-badge">{j.ordenTurno}</div>
+                  <div className="player-badge" style={{ background: getPlayerColor(j.ordenTurno) }}>{j.ordenTurno}</div>
                   <span className="player-name">{j.nombre}</span>
                 </label>
               ))}
@@ -99,7 +108,7 @@ export function SenalamientoView({ partida, codigoSala, userId }: Props) {
             .sort((a, b) => a.ordenTurno - b.ordenTurno)
             .map((j) => (
               <div key={j.id} className="player-item">
-                <div className="player-badge">{j.ordenTurno}</div>
+                <div className="player-badge" style={{ background: getPlayerColor(j.ordenTurno) }}>{j.ordenTurno}</div>
                 <span className="player-name">{j.nombre}</span>
                 <span style={{ marginLeft: 'auto', fontSize: '0.875rem' }}>
                   {j.haSenalado ? (

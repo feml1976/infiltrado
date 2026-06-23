@@ -274,9 +274,21 @@ p {
   border-color: var(--c-primary);
 }
 
+.field input:focus-visible {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+  outline: none;
+}
+
 .field input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
+}
+
+/* ── Focus ring global ───────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--c-primary-light);
+  outline-offset: 2px;
 }
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
@@ -290,8 +302,11 @@ p {
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background var(--tr-fast);
+  transition: background var(--tr-fast),
+              transform var(--tr-fast),
+              box-shadow var(--tr-fast);
   min-height: 44px;
+  will-change: transform;
 }
 
 .btn-block {
@@ -305,6 +320,14 @@ p {
 
 .btn-primary:hover:not(:disabled) {
   background: var(--c-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  box-shadow: none;
+  transition-duration: 0.05s;
 }
 
 .btn-primary:disabled {
@@ -319,6 +342,12 @@ p {
 
 .btn-secondary:hover:not(:disabled) {
   background: #334155;
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: scale(0.97);
+  transition-duration: 0.05s;
 }
 
 /* ── Alerts ──────────────────────────────────────────────────────────────── */
@@ -703,6 +732,169 @@ a.link:hover {
   border-radius: var(--r-md);
   margin-top: 0.75rem;
   display: block;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────────────────── */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes playerSlideIn {
+  from { opacity: 0; transform: translateX(-14px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseTurno {
+  0%, 100% { box-shadow: var(--shadow-md); }
+  50%      { box-shadow: var(--shadow-md), 0 0 0 5px rgba(99, 102, 241, 0.18); }
+}
+
+@keyframes scoreFlash {
+  0%   { background: transparent; }
+  25%  { background: rgba(99, 102, 241, 0.18); }
+  100% { background: transparent; }
+}
+
+@keyframes actionConfirmed {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Transición de fase ──────────────────────────────────────────────────── */
+.fase-content {
+  animation: fadeSlideIn var(--dur-slide) both;
+}
+
+/* ── Indicador de turno pulsante ─────────────────────────────────────────── */
+.turno-info--mio {
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  animation: pulseTurno var(--dur-pulse) ease-in-out infinite;
+}
+
+/* ── Jugador recién unido ─────────────────────────────────────────────────── */
+.player-item--new {
+  animation: playerSlideIn 0.35s var(--ease-back) both;
+}
+
+/* ── Jugador en turno activo ─────────────────────────────────────────────── */
+.player-item--active-turn {
+  transition: background var(--tr-med), box-shadow var(--tr-med);
+}
+
+/* ── Items interactivos del lobby (checkbox labels) ──────────────────────── */
+label.player-item {
+  transition: background var(--tr-fast), transform var(--tr-fast);
+}
+label.player-item:hover {
+  background: var(--c-surface-2);
+  transform: translateX(2px);
+}
+
+/* ── Fila de puntos con flash ─────────────────────────────────────────────── */
+.score-row--flash {
+  animation: scoreFlash 0.7s ease both;
+}
+
+/* ── Confirmación de acción ──────────────────────────────────────────────── */
+.action-confirmed {
+  animation: actionConfirmed var(--tr-med) both;
+}
+
+/* ── Revelación escalonada ───────────────────────────────────────────────── */
+@keyframes revealIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.revelacion-jugador--visible {
+  animation: revealIn 0.35s var(--ease-back) both;
+}
+
+.revelacion-jugador--infiltrado {
+  border-left: 3px solid var(--c-danger);
+  background: rgba(248, 113, 113, 0.06);
+}
+
+.revelacion-pending {
+  color: var(--c-text-dim);
+  margin-left: auto;
+  letter-spacing: 0.2em;
+  font-size: 0.875rem;
+}
+
+/* ── Podio ───────────────────────────────────────────────────────────────── */
+@keyframes podioIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.podio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.podio-card {
+  background: var(--c-bg);
+  border-radius: var(--r-md);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  animation: podioIn 0.4s var(--ease-back) both;
+}
+
+.podio-card--oro    { border: 1px solid rgba(245, 158, 11, 0.45); background: rgba(245, 158, 11, 0.07); }
+.podio-card--plata  { border: 1px solid rgba(148, 163, 184, 0.35); background: rgba(148, 163, 184, 0.07); }
+.podio-card--bronce { border: 1px solid rgba(180, 83, 9, 0.35); background: rgba(180, 83, 9, 0.07); }
+
+.podio-medalla {
+  font-size: 1.375rem;
+  flex-shrink: 0;
+  width: 2rem;
+  text-align: center;
+  line-height: 1;
+}
+
+.podio-posicion {
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 2rem;
+  text-align: center;
+  font-size: 0.9375rem;
+  color: var(--c-text-dim);
+}
+
+.podio-puntos        { font-weight: 700; color: var(--c-text-2); margin-left: auto; }
+.podio-puntos--lider { color: #f59e0b; font-size: 1.0625rem; }
+
+/* ── Toggle de sonido ────────────────────────────────────────────────────── */
+.sound-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-full);
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--c-text-muted);
+  cursor: pointer;
+  transition: background var(--tr-fast), border-color var(--tr-fast), transform var(--tr-fast);
+  line-height: 1;
+}
+
+.sound-toggle:hover {
+  background: var(--c-surface-2);
+  border-color: var(--c-primary);
+  transform: scale(1.04);
+}
+
+.sound-toggle:focus-visible {
+  outline: 2px solid var(--c-primary-light);
+  outline-offset: 2px;
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
